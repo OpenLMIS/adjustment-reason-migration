@@ -40,15 +40,16 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
 
             if stock_reason is not None:
                 # We have found a reason/valid reason combo that matches
-                print 'Found exact existing valid reason. id: ' + stock_reason[1] + ', name: ' + stock_reason['name']
+                print 'Found exact existing valid reason. id: {}, name: {}'\
+                    .format(stock_reason[1], stock_reason['name'])
 
                 ref_stock_mapping[mapping_key] = stock_reason[1]
             else:
                 stock_reason = reason_utils.find_stock_reason(refdata_reason, stock_reasons)
                 if stock_reason is not None:
                     # We found the reason, but not for the program/facility type combo
-                    print 'Found existing reason in stock, but not for this program/facility type. Id: ' + \
-                          stock_reason[0] + ', name: ' + stock_reason['name']
+                    print 'Found existing reason in stock, but not for this program/facility type. Id: {}, name: {}'\
+                        .format(stock_reason[0], stock_reason['name'])
                     print 'Need to create valid reason for program & facility type'
                     
                     vra_id = str(uuid.uuid4())
@@ -88,8 +89,8 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
                     new_reason_count += 1
                     new_valid_reason_count += 1
 
-    print "Done migrating Reference Data reasons to Stock Management. Added " + str(new_reason_count) + \
-          " new reasons, and " + str(new_valid_reason_count) + " valid reason assignments."
+    print "Done migrating Reference Data reasons to Stock Management. Added {} new reasons, and {} valid reason " \
+          "assignments.".format(str(new_reason_count), str(new_valid_reason_count))
     print "Migrating Requisition adjustments to use Stock Reason IDs"
 
     vra_ids = db.fetch_valid_reason_assignment_ids(cur)
@@ -117,7 +118,7 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
             mapping_key = reason_utils.build_mapping_key(reason_id, facility_type)
             new_reason_id = ref_stock_mapping[mapping_key]
 
-            print 'Chaging reason ID to: ' + new_reason_id
+            print 'Changing reason ID to: ' + new_reason_id
 
             db.update_adjustment(cur, a_id, new_reason_id)
 

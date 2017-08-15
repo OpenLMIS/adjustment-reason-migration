@@ -26,5 +26,13 @@ class TestStringMethods(unittest.TestCase):
         stock_reason['description'] = 'different'
         self.assertFalse(reason_utils.reason_properties_equal(refdata_reason, stock_reason))
 
+    def test_build_mapping_key(self):
+        ref_id = "XXXX-432"
+        f_id = "VVVV-333"
+
+        result = reason_utils.build_mapping_key(ref_id, f_id)
+
+        self.assertEqual("XXXX-432_VVVV-333", result)
+
 if __name__ == '__main__':
     unittest.main()
