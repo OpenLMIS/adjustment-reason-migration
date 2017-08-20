@@ -2,7 +2,7 @@ FROM python:2.7-alpine
 
 COPY requirements.txt /
 COPY reason_migration.py /
-COPY reason_checks.py /
+COPY reason_utils.py /
 COPY db.py /
 
 RUN apk update

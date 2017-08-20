@@ -3,6 +3,11 @@
 import psycopg2.extras
 
 
+def connect(host, port, db_name, user, password):
+    return psycopg2.connect("dbname='{}' user='{}' host='{}' password='{}' port='{}'"
+                            .format(db_name, user, host, password, port))
+
+
 def insert_valid_reason(cursor, v_id, facility_type_id, program_id, reason_id):
     cursor.execute("""INSERT INTO stockmanagement.valid_reason_assignments (id, facilitytypeid, programid, reasonid)
                           VALUES (%s, %s, %s, %s);""", (v_id, facility_type_id, program_id, reason_id))
