@@ -29,6 +29,11 @@ def create_req_adjustment_cursor(conn):
     return req_cur
 
 
+def count_adjustments(cur):
+    cur.execute("""SELECT COUNT(*) FROM requisition.stock_adjustments""")
+    return cur.fetchone()[0]
+
+
 def fetch_facility_types(cursor):
     cursor.execute("""SELECT * FROM referencedata.facility_types""")
     return cursor.fetchall()
