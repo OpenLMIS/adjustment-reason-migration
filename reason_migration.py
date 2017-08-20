@@ -13,7 +13,7 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 debug = open(log_dir + '/debug.log', 'w')
 
-msg = "Starting migration of Adjustment Reasons from Reference Data to Stock Management"
+msg = "Starting migration of Adjustment Reasons from Reference Data to Stock Management\n"
 print msg
 debug.write(msg)
 
@@ -34,10 +34,11 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
     new_reason_count = 0
     new_valid_reason_count = 0
 
-    msg = "Migrating {} reasons from Reference Data to Stock Management, using {} facility types\n" \
+    msg = "Migrating {} reasons from Reference Data to Stock Management, using {} facility types" \
         .format(refdata_reason_count, facility_type_count)
     print msg
     debug.write(msg)
+    debug.write('\n')
 
     # We go through ref data resons, mapping them to valid reasons, creating missing reasons in the process
     i = 0
@@ -118,7 +119,7 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
             sys.stdout.write("\rMigration progress: {}%".format(percentage))
             sys.stdout.flush()
 
-    msg = "\nDone migrating Reference Data reasons to Stock Management. Added {} new reasons, and {} valid reason " \
+    msg = "\n\nDone migrating Reference Data reasons to Stock Management. Added {} new reasons, and {} valid reason " \
           "assignments.\n".format(str(new_reason_count), str(new_valid_reason_count))
 
     print msg
@@ -126,10 +127,11 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
 
     adjustment_count = db.count_adjustments(cur)
 
-    msg = "Migrating {} Requisition Adjustments to use Stock Reason IDs\n".format(adjustment_count)
+    msg = "Migrating {} Requisition Adjustments to use Stock Reason IDs".format(adjustment_count)
 
     print msg
     debug.write(msg)
+    debug.write('\n')
 
     vra_ids = db.fetch_valid_reason_assignment_ids(cur)
 
@@ -169,6 +171,6 @@ with psycopg2.connect("dbname='open_lmis' user='postgres' host='192.168.1.6' pas
         sys.stdout.write("\rMigration progress: {}%".format(percentage))
         sys.stdout.flush()
 
-    msg = '\nMigration finished. Updated {} Requisition Adjustments\n'.format(updated_adjustments_count)
+    msg = '\n\nMigration finished. Updated {} Requisition Adjustments\n'.format(updated_adjustments_count)
     print msg
     debug.write(msg)
