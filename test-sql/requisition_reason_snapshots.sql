@@ -1,0 +1,1 @@
+﻿SELECT * FROM requisition.stock_adjustment_reasons;
