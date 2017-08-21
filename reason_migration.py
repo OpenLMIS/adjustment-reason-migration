@@ -54,7 +54,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
             for facility_type in facility_types:
                 debug.write('Checking facility type: ' + facility_type['name'] + '\n')
-                mapping_key = reason_utils.build_reason_mapping_key(refdata_reason['id'], facility_type['id'])
+                mapping_key = reason_utils.build_mapping_key(refdata_reason['id'], facility_type['id'])
 
                 program_id = refdata_reason['programid']
                 facility_type_id = facility_type['id']
@@ -76,7 +76,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                         # We found the reason, but not for the program/facility type combo
                         debug.write(
                             'Found existing reason in stock, but not for this program/facility type. Id: {}, name: {}\n'
-                                .format(stock_reason[0], stock_reason['name']))
+                            .format(stock_reason[0], stock_reason['name']))
                         debug.write('Need to create valid reason for program & facility type\n')
 
                         vra_id = str(uuid.uuid4())
@@ -126,7 +126,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         # Build mappings for snapshot assignment
         program_type_reason_mapping = {}
         for entry in stock_reasons:
-            key = reason_utils.build_program_ftype_mapping_reason(entry['facilitytypeid'], entry['programid'])
+            key = reason_utils.build_mapping_key(entry['facilitytypeid'], entry['programid'])
             if program_type_reason_mapping.get(key) is None:
                 program_type_reason_mapping[key] = list()
             program_type_reason_mapping[key].append(entry)
@@ -156,7 +156,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
             debug.write('Processing requisition {}. Facility type: {}, program: {}\n'
                         .format(req_id, facility_type_id, program_id))
 
-            mapping_key = reason_utils.build_program_ftype_mapping_reason(facility_type_id, program_id)
+            mapping_key = reason_utils.build_mapping_key(facility_type_id, program_id)
 
             entry_list = program_type_reason_mapping.get(mapping_key)
             if entry_list is not None:
@@ -202,7 +202,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
             if reason_id in stock_ids:
                 debug.write('Reason points to a stock management UUID already: ' + reason_id + '\n')
             else:
-                mapping_key = reason_utils.build_reason_mapping_key(reason_id, facility_type_id)
+                mapping_key = reason_utils.build_mapping_key(reason_id, facility_type_id)
                 new_reason_id = ref_stock_mapping[mapping_key]
 
                 debug.write('Changing reason ID to: ' + new_reason_id + '\n')

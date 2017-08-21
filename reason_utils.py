@@ -31,12 +31,8 @@ def reason_type_equal(refdata_reason, stock_reason):
            (not refdata_reason['additive'] and stock_reason['reasontype'] == 'DEBIT')
 
 
-def build_reason_mapping_key(refdata_reason_id, facility_type_id):
-    return refdata_reason_id + '_' + facility_type_id
-
-
-def build_program_ftype_mapping_reason(program_id, facility_type_id):
-    return program_id + '_' + facility_type_id
+def build_mapping_key(left, right):
+    return left + '_' + right
 
 
 def to_lower(string):
