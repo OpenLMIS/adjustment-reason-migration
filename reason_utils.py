@@ -31,14 +31,26 @@ def reason_type_equal(refdata_reason, stock_reason):
            (not refdata_reason['additive'] and stock_reason['reasontype'] == 'DEBIT')
 
 
-def build_mapping_key(refdata_reason_id, facility_type_id):
+def build_reason_mapping_key(refdata_reason_id, facility_type_id):
     return refdata_reason_id + '_' + facility_type_id
+
+
+def build_program_ftype_mapping_reason(program_id, facility_type_id):
+    return program_id + '_' + facility_type_id
 
 
 def to_lower(string):
     return string.lower() if string else None
 
 
-def reason_entry(r_id, v_id, name, description, facility_type_id, program_id, reason_type):
+def reason_entry(r_id, v_id, name, description, facility_type_id, program_id, reason_type, reason_category,
+                 is_free_text_allowed):
     return {0: r_id, 1: v_id, 'name': name, 'description': description, 'programid': program_id,
-            'facilitytypeid': facility_type_id, 'reasontype': reason_type}
+            'facilitytypeid': facility_type_id, 'reasontype': reason_type, 'reasoncategory': reason_category,
+            'isfreetextallowed': is_free_text_allowed}
+
+
+def print_and_debug(debug, msg):
+    debug.write(msg)
+    debug.write('\n')
+    print msg
