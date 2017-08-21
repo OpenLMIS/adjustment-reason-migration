@@ -13,6 +13,7 @@ db_name = os.environ['DB_NAME']
 db_pass = os.environ['DB_PASS']
 db_user = os.environ['DB_USER']
 
+
 log_dir = 'log'
 
 if not os.path.exists(log_dir):
@@ -160,16 +161,24 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
             entry_list = program_type_reason_mapping.get(mapping_key)
             if entry_list is not None:
+                debug.write('Creating snapshots for requisition: {}. Facility type: {} program :{}\n'
+                            .format(req_id, facility_type_id, program_id))
                 for entry in entry_list:
                     reason_id = entry[0]
                     debug.write("Creating a snapshot for requisition {} and reason {}\n".format(req_id, reason_id))
                     db.insert_requisition_snapshot_reason(cur, req_id, entry)
                     new_snapshot_count += 1
+            else:
+                debug.write('No snapshots will be created for requistion: {}. Facility type: {} program :{}\n'
+                            .format(req_id, facility_type_id, program_id))
 
             i += 1
             reason_utils.print_percentage(i, req_count)
 
-        reason_utils.print_and_debug(debug, "\nFinished creating creating snapshot adjustment reasons for {} "
+        # We want to mark all requisitions as updated
+        db.update_all_requisitions_date_modified(cur)
+
+        reason_utils.print_and_debug(debug, "\nFinished creating snapshot adjustment reasons for {} "
                                             "requisitions. Created {} snapshots.\n".format(req_count,
                                                                                            new_snapshot_count))
 

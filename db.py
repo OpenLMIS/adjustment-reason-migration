@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import datetime
 import psycopg2.extras
 import uuid
 
@@ -102,6 +102,11 @@ def insert_requisition_snapshot_reason(cur, req_id, entry):
                 reasontype, reasoncategory, isfreetextallowed) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
                 (str(uuid.uuid4()), req_id, reason_id, name, description, reason_type, reason_category,
                  is_free_text_allowed))
+
+
+def update_all_requisitions_date_modified(cur):
+    now = datetime.datetime.utcnow()
+    cur.execute("""UPDATE requisition.requisitions SET modifiedDate = %s""", [now])
 
 
 def clear_snapshots(cur):
