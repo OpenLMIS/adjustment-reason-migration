@@ -167,10 +167,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     new_snapshot_count += 1
 
             i += 1
-            percentage = int((float(i) / req_count) * 100)
-
-            sys.stdout.write("\rMigration progress: {}%".format(percentage))
-            sys.stdout.flush()
+            reason_utils.print_percentage(i, req_count)
 
         reason_utils.print_and_debug(debug, "\nFinished creating creating snapshot adjustment reasons for {} "
                                             "requisitions. Created {} snapshots.\n".format(req_count,
@@ -212,10 +209,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 updated_adjustments_count += 1
 
             i += 1
-            percentage = int((float(i) / adjustment_count) * 100)
-
-            sys.stdout.write("\rMigration progress: {}%".format(percentage))
-            sys.stdout.flush()
+            reason_utils.print_percentage(i, adjustment_count)
 
         reason_utils.print_and_debug(debug, "\nMigration finished. Had to update {} out of {} Requisition Adjustments\n"
                                      .format(updated_adjustments_count, adjustment_count))

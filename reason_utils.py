@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import sys
 
 
 def find_full_stock_reason(refdata_reason, stock_reasons, facility_type):
@@ -50,3 +51,10 @@ def print_and_debug(debug, msg):
     debug.write(msg)
     debug.write('\n')
     print msg
+
+
+def print_percentage(completed, total):
+    percentage = int((float(completed) / total) * 100)
+
+    sys.stdout.write("\rMigration progress: {}%".format(percentage))
+    sys.stdout.flush()
