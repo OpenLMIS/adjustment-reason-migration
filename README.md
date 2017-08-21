@@ -1,7 +1,44 @@
 # adjustment-reason-migration
-Cross service migration of adjustment reasons used by requisition - from referencedata to stock management.
 
-This performs the migration of reasons from the Referencedata service to the Stock Management service, as well
+Cross service migration of adjustment reasons used by Requisition - from Referencedata to Stock Management.
+
+## Usage
+
+In order to use the first, you need the configuration file for it in your local working directory.
+In the top-level directory of this repository execute:
+
+```bash
+cp sample-config/.env .
+```
+Then edit the file, so that it points to your database. The script needs to
+connect to PostgreSQL database instance which OpenLMIS is using.
+
+Next simply run the migration script using Docker Compose:
+
+```bash
+docker-compose run migration
+```
+
+That's it - the migration will run and give you output about its progress.
+For detailed debug information, the script logs to a file *called adjustment-migration.log*.
+By default the directory under which this file is placed is mount in the *docker-compose.yml* file
+to */tmp*. So in order to view the file, use a command similar to:
+
+```bash
+less /tmp/adjustment-migration.log
+```
+
+## Building
+
+The Docker image is built on Docker Hub. In order to build the it locally, simply run the build script:
+
+```bash
+./build.sh
+``` 
+
+## Script details
+
+This script performs the migration of reasons from the Referencedata service to the Stock Management service, as well
 as the migration of Requisition adjutments to use the UUIDs of the reasons in stock management.
 
 These script will execute these steps:
