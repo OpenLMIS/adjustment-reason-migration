@@ -46,7 +46,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         reason_utils.print_and_debug(debug, "Migrating {} reasons from Reference Data to Stock Management using {} "
                                             "facility types".format(refdata_reason_count, facility_type_count))
 
-        # We go through ref data resons, mapping them to valid reasons, creating missing reasons in the process
+        # We go through ref data reasons, mapping them to valid reasons, creating missing reasons in the process
 
         for refdata_reason in refdata_reasons:
             debug.write("Reference data reason: ")
@@ -101,7 +101,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                         reason_type = 'CREDIT' if refdata_reason['additive'] else 'DEBIT'
 
                         db.insert_stock_reason(cur, r_id, refdata_reason['name'], refdata_reason['description'], True,
-                                               'Adjustment', reason_type)
+                                               'ADJUSTMENT', reason_type)
 
                         vra_id = str(uuid.uuid4())
 
@@ -143,6 +143,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
         new_snapshot_count = 0
         i = 0
+        nonexistent_facs = list()
         for req in req_cur:
             req_id = req['id']
             program_id = req['programid']
@@ -152,6 +153,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
             if facility_type_id is None:
                 i += 1
                 debug.write('WARN: facility does not exist: {}\n'.format(facility_id))
+                nonexistent_facs.append(facility_id)
                 continue
 
             debug.write('Processing requisition {}. Facility type: {}, program: {}\n'
@@ -181,6 +183,11 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         reason_utils.print_and_debug(debug, "\nFinished creating snapshot adjustment reasons for {} "
                                             "requisitions. Created {} snapshots.\n".format(req_count,
                                                                                            new_snapshot_count))
+
+        if len(nonexistent_facs) > 0:
+            reason_utils.print_and_debug(debug, 'WARNING! {} facilities from Requisition do not exist in '
+                                                'Reference Data: {}\n'.format(len(nonexistent_facs),
+                                                                              str(nonexistent_facs)))
 
         adjustment_count = db.count_adjustments(cur)
 
