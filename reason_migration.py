@@ -5,13 +5,13 @@ import reason_utils
 import db
 import uuid
 import os
-import sys
 
-db_host = '10.222.17.221'
-db_port = '5432'
-db_name = 'open_lmis'
-db_pass = 'p@ssw0rd'
-db_user = 'postgres'
+
+db_host = os.environ['DB_HOST']
+db_port = os.environ['DB_PORT']
+db_name = os.environ['DB_NAME']
+db_pass = os.environ['DB_PASS']
+db_user = os.environ['DB_USER']
 
 log_dir = 'log'
 
