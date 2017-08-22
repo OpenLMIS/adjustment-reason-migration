@@ -105,7 +105,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
                         vra_id = str(uuid.uuid4())
 
-                        db.insert_valid_reason(cur, vra_id, facility_type['id'], refdata_reason['programid'], r_id)
+                        db.insert_valid_reason(cur, vra_id, facility_type_id, refdata_reason['programid'], r_id)
 
                         entry = reason_utils.reason_entry(r_id, vra_id, name, description, facility_type_id, program_id,
                                                           reason_type, 'ADJUSTMENT', True)
@@ -127,10 +127,12 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         # Build mappings for snapshot assignment
         program_type_reason_mapping = {}
         for entry in stock_reasons:
-            key = reason_utils.build_mapping_key(entry['facilitytypeid'], entry['programid'])
-            if program_type_reason_mapping.get(key) is None:
-                program_type_reason_mapping[key] = list()
-            program_type_reason_mapping[key].append(entry)
+            # Entries for reasons without valid assignments should get ignored
+            if entry[1] is not None:
+                key = reason_utils.build_mapping_key(entry['facilitytypeid'], entry['programid'])
+                if program_type_reason_mapping.get(key) is None:
+                    program_type_reason_mapping[key] = list()
+                program_type_reason_mapping[key].append(entry)
 
         req_count = db.count_requisitions(cur)
         req_cur = db.create_requisitions_cursor(conn)
