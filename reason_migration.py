@@ -55,13 +55,13 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
             for facility_type in facility_types:
                 debug.write('Checking facility type: ' + facility_type['name'] + '\n')
-                mapping_key = reason_utils.build_mapping_key(refdata_reason['id'], facility_type['id'])
 
                 program_id = refdata_reason['programid']
                 facility_type_id = facility_type['id']
                 name = refdata_reason['name']
                 description = refdata_reason['name']
                 reason_type = 'CREDIT' if refdata_reason['additive'] else 'DEBIT'
+                refdata_reason_id = refdata_reason['id']
 
                 stock_reason = reason_utils.find_full_stock_reason(refdata_reason, stock_reasons, facility_type)
 
@@ -70,7 +70,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     debug.write('Found exact existing valid reason. id: {}, name: {}\n'
                                 .format(stock_reason[1], stock_reason['name']))
 
-                    ref_stock_mapping[mapping_key] = stock_reason[0]
+                    ref_stock_mapping[refdata_reason_id] = stock_reason[0]
                 else:
                     stock_reason = reason_utils.find_stock_reason(refdata_reason, stock_reasons)
                     if stock_reason is not None:
@@ -90,7 +90,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                                                           stock_reason['isfreetextallowed'])
                         stock_reasons.append(entry)
 
-                        ref_stock_mapping[mapping_key] = r_id
+                        ref_stock_mapping[refdata_reason_id] = r_id
 
                         new_valid_reason_count += 1
                     else:
@@ -111,7 +111,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                                                           reason_type, 'ADJUSTMENT', True)
                         stock_reasons.append(entry)
 
-                        ref_stock_mapping[mapping_key] = r_id
+                        ref_stock_mapping[refdata_reason_id] = r_id
 
                         new_reason_count += 1
                         new_valid_reason_count += 1
@@ -200,29 +200,26 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         adj_cur = db.create_req_adjustment_cursor(conn)
 
         i = 0
+        bad_reason_id_count = 0
         for record in adj_cur:
             a_id = record['id']
             reason_id = record['reasonid']
-            facility_id = record['facilityid']
-            program = record['programid']
 
-            facility_type_id = facility_type_map.get(facility_id)
-            if facility_type_id is None:
-                debug.write('WARN: facility does not exist: {}\n'.format(facility_id))
-                continue
-
-            debug.write('Processing adjustment {}. Facility type: {}, program: {}, current reason id: {}\n'
-                        .format(a_id, facility_type_id, program, reason_id))
+            debug.write('Processing adjustment {}. Current reason id: {}\n'
+                        .format(a_id, reason_id))
 
             if reason_id in stock_ids:
                 debug.write('Reason points to a stock management UUID already: ' + reason_id + '\n')
             else:
-                mapping_key = reason_utils.build_mapping_key(reason_id, facility_type_id)
-                new_reason_id = ref_stock_mapping[mapping_key]
+                new_reason_id = ref_stock_mapping.get(reason_id)
 
-                debug.write('Changing reason ID to: ' + new_reason_id + '\n')
+                if new_reason_id is None:
+                    debug.write("WARN! Stock Adjustment {} has a non existent reason ID: {}".format(a_id, reason_id))
+                    bad_reason_id_count += 1
+                else:
+                    debug.write('Changing reason ID to: ' + new_reason_id + '\n')
 
-                db.update_adjustment(cur, a_id, new_reason_id)
+                    db.update_adjustment(cur, a_id, new_reason_id)
 
                 updated_adjustments_count += 1
 
@@ -231,5 +228,9 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
         reason_utils.print_and_debug(debug, "\nMigration finished. Had to update {} out of {} Requisition Adjustments\n"
                                      .format(updated_adjustments_count, adjustment_count))
+
+        if bad_reason_id_count > 0:
+            reason_utils.print_and_debug(debug, "WARN: {} adjustments have non-existent reason ids assigned"
+                                         .format(bad_reason_id_count))
 
     reason_utils.print_and_debug(debug, 'Migration finished successfully')

@@ -28,9 +28,7 @@ def create_req_adjustment_cursor(conn):
     adj_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor, name='adj_cursor')
     adj_cur.itersize = 2000
 
-    adj_cur.execute("""SELECT a.id, a.reasonid, req.facilityid, req.programid FROM requisition.stock_adjustments a
-                          LEFT JOIN requisition.requisition_line_items item ON a.requisitionlineitemid = item.id
-                          LEFT JOIN requisition.requisitions req ON item.requisitionid = req.id""")
+    adj_cur.execute("""SELECT id, reasonid FROM requisition.stock_adjustments""")
 
     return adj_cur
 
