@@ -41,32 +41,54 @@ The Docker image is built on Docker Hub. In order to build the it locally, simpl
 This script performs the migration of reasons from the Referencedata service to the Stock Management service, as well
 as the migration of Requisition adjutments to use the UUIDs of the reasons in stock management.
 
-These script will execute these steps:
-1) Retrieve all facility types from Referencedata
-2) Retrieve all adjustment reasons from Referencedata
-3) Retrieve all valid reasons assignments joined with stock reasons from Stock Management
-4) For reach reason from Referencedata and each facility type, do:
-    * Check if a valid reason assignment exists for the facility type/program combo. The stock reason associated must
-    have a matching name, description and type(CREDIT/DEBIT). Comparisons for name and description are case insensitive.
-    If such a reason exists in Stock Management, we store a mapping between it and the refdata reason in the memory.
-    * If no assignment exists for program and facility type, check if a matching stock reason exists at all (matching 
-    described in the previous step) If yes, a valid reason assignment is inserted into the db and associated with the
-    matched reason. A mapping to the valid reason assignment from the Referencedata reason is stored in memory.
-    * If no matching reason exists at all, both a stock reason and a valid reason assignment are created. The mapping is
-    also stored.
+The migration executes three steps:
 
-After the steps above are complete, the reasons from Referencedata are now migrated to stock management. The output of
-this phase is a map, in which each combo of facility type and a Referencedata reason id is mapped to a valid reason
-assignment ID in Stock Management. 
+### Step 1 - migration of reasons from Reference Data to Stock Management
 
-In the next phase, we migrate existing adjustments in Requisition to point to Stock reasons instead of Referencedata reasons.
+Reasons will be migrated from Reference Data to the Stock Management Service. In refdata, a reason has a program
+for which it is valid. In Stock Management, reasons do not store this information - they have valid reason assignments
+associated with them. Such a valid reason assignment stores an ID of the program and an ID of the faciliy type.
 
-These steps are executed:
-1) Fetch all valid assignment ids from stock for reference
-2) Fetch all facilities and map them to facility types
-3) Fetch a join between the stock adjustments, requisition line items and requisitions. Do this in batch of 2000, while iterating
-over each row.
-4) For each of the rows, check if the ID of the reasons comes from Stock. If yes, do nothing for this row.
-5) If not, we figure out the facility type based on the facility from the requisition. Based on the facility type and the
-ID of the reason from Referencedata, we get the ID of the reason in Stock from our map created in phase 1.
-   
+In order to perform this migration, we match the refdata reasons against stock reasons using the name, description
+and type. If they match, we treat them as the same. If a matching stock adjustment does not exist we create it,
+if it does we use it. 
+
+Since in refdata reasons are not associated with facility types, we have to iterate over all facility types 
+from refdata for each reason. We match a refdata reason against a stock reason joined with the valid reason 
+assignment - if the assignment by the given program of the refdata reason and facility type does not exist, 
+we create it.  
+
+During this migration step the script creates a mapping between refdata reasons and stock reasons for step 3,
+it also stores the information about the new reasons for step 2. Refdata reasons are left as they were after
+this step is finished.
+
+Since we do matching during this step, running it multiple times on the same database should not make a
+difference.
+
+### Step 2 - creation of valid reason lists (snapshots) for each requisition
+
+In this step, we iterate over all of the requisitions. For each of them, we find all valid reason assignments,
+based on their program and the type of their facility. We create a snapshot of that reason and tie it to the
+requisition, copying over the data from stock management.
+
+At the end of this step, we update the modified date for all requisitions, so that they will be retrieved again
+on the UI.
+
+Note that before this step, we clear all the snapshots from the database for performance. This does not affect
+normal use cases, since in those cases these snapshots are not there at all. It allows to run the migration
+multiple times without duplicating data however, without any performance penalty.
+
+### Step 3 - change reason IDs in requisitions to point to stock management reasons
+
+In the last step, we iterate over all stock adjustments and based on the mapping from step #1, we assign them
+new reason ids that point to stock. If an adjustments already has an ID that points to a stock management
+reason, we leave it alone.
+
+
+## Error reporting
+
+The script will report on two possible issues with data in te standard output: non-existent facilities for 
+requisitions and non-existent reason IDs for stock adjustments. Detailed data on these as well as more information
+can be found in the debug log.
+
+The script also reports on the numbers of data it processes as well the number of updates it executes.
