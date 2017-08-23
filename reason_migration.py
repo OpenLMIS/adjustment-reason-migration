@@ -158,6 +158,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         new_snapshot_count = 0
         i = 0
         nonexistent_facs = list()
+        batch_data = list()
         for req in req_cur:
             req_id = req['id']
             program_id = req['programid']
@@ -182,13 +183,22 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 for entry in entry_list:
                     reason_id = entry[0]
                     debug.write("Creating a snapshot for requisition {} and reason {}\n".format(req_id, reason_id))
-                    db.insert_requisition_snapshot_reason(cur, req_id, entry)
+
+                    batch_data.append((req_id, entry))
+
                     new_snapshot_count += 1
+
             else:
                 debug.write('No snapshots will be created for requistion: {}. Facility type: {} program :{}\n'
                             .format(req_id, facility_type_id, program_id))
 
             i += 1
+
+            if len(batch_data) >= 2000 or i == req_count:
+                debug.write("Executing batch insert of {}\n".format(len(batch_data)))
+                db.insert_requisition_snapshots(cur, batch_data)
+                del batch_data[:]
+
             reason_utils.print_percentage(i, req_count)
 
         # We want to mark all requisitions as updated
@@ -204,42 +214,34 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                                                                               str(nonexistent_facs)))
 
         adjustment_count = db.count_adjustments(cur)
+        updates_to_exec = len(ref_stock_mapping)
 
-        reason_utils.print_and_debug(debug, "Migrating {} Requisition Adjustments to use Stock Reason IDs"
-                                     .format(adjustment_count))
+        reason_utils.print_and_debug(debug, "Migrating {} Requisition Adjustments to use Stock Reason IDs. "
+                                     "Executing updates for {} reason IDs."
+                                     .format(adjustment_count, updates_to_exec))
 
         updated_adjustments_count = 0
-        adj_cur = db.create_req_adjustment_cursor(conn)
 
         i = 0
-        bad_reason_id_count = 0
-        for record in adj_cur:
-            a_id = record['id']
-            reason_id = record['reasonid']
+        for old_id, new_id in ref_stock_mapping.iteritems():
 
-            debug.write('Processing adjustment {}. Current reason id: {}\n'
-                        .format(a_id, reason_id))
+            debug.write('Updating reason id {} to: {}\n'.format(old_id, new_id))
 
-            if reason_id in stock_ids:
-                debug.write('Reason points to a stock management UUID already: ' + reason_id + '\n')
+            if old_id != new_id:
+                db.update_adjustments(cur, old_id, new_id)
+                updated_adjustments_count += cur.rowcount
             else:
-                new_reason_id = ref_stock_mapping.get(reason_id)
+                debug.write('{} is the same reason id both in Reference Data and Stock Management'.format(old_id))
 
-                if new_reason_id is None:
-                    debug.write("WARN! Stock Adjustment {} has a non existent reason ID: {}".format(a_id, reason_id))
-                    bad_reason_id_count += 1
-                else:
-                    debug.write('Changing reason ID to: ' + new_reason_id + '\n')
-
-                    db.update_adjustment(cur, a_id, new_reason_id)
-
-                updated_adjustments_count += 1
+            debug.write('Updated {} adjustments\n'.format(cur.rowcount))
 
             i += 1
-            reason_utils.print_percentage(i, adjustment_count)
+            reason_utils.print_percentage(i, updates_to_exec)
 
         reason_utils.print_and_debug(debug, "\nMigration finished. Had to update {} out of {} Requisition Adjustments\n"
                                      .format(updated_adjustments_count, adjustment_count))
+
+        bad_reason_id_count = db.count_bad_adjustments(cur, stock_ids)
 
         if bad_reason_id_count > 0:
             reason_utils.print_and_debug(debug, "WARN: {} adjustments have non-existent reason ids assigned"

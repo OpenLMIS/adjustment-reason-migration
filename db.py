@@ -20,17 +20,9 @@ def insert_stock_reason(cursor, r_id, name, description, isfreetextallowed, reas
                    (r_id, name, description, isfreetextallowed, reason_category, reason_type))
 
 
-def update_adjustment(cur, a_id, new_reason_id):
-    cur.execute("""UPDATE requisition.stock_adjustments SET reasonid = %s WHERE ID = %s""", (new_reason_id, a_id))
-
-
-def create_req_adjustment_cursor(conn):
-    adj_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor, name='adj_cursor')
-    adj_cur.itersize = 2000
-
-    adj_cur.execute("""SELECT id, reasonid FROM requisition.stock_adjustments""")
-
-    return adj_cur
+def update_adjustments(cur, old_reason_id, new_reason_id):
+    cur.execute("""UPDATE requisition.stock_adjustments SET reasonid = %s WHERE reasonid = %s""", (new_reason_id,
+                                                                                             old_reason_id))
 
 
 def count_adjustments(cur):
@@ -88,18 +80,28 @@ def check_if_snapshot_reason_exists(cur, req_id, reason_id):
     return count > 0
 
 
-def insert_requisition_snapshot_reason(cur, req_id, entry):
-    reason_id = entry[0]
-    name = entry['name']
-    description = entry['description']
-    reason_type = entry['reasontype']
-    reason_category = entry['reasoncategory']
-    is_free_text_allowed = entry['isfreetextallowed']
+def insert_requisition_snapshots(cur, data):
+    batch = 'INSERT INTO requisition.stock_adjustment_reasons (id, requisitionid, reasonid, name, description, ' \
+            'reasontype, reasoncategory, isfreetextallowed) VALUES '
 
-    cur.execute("""INSERT INTO requisition.stock_adjustment_reasons (id, requisitionid, reasonid, name, description,
-                reasontype, reasoncategory, isfreetextallowed) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
-                (str(uuid.uuid4()), req_id, reason_id, name, description, reason_type, reason_category,
-                 is_free_text_allowed))
+    inserts = []
+
+    for (req_id, entry) in data:
+        reason_id = entry[0]
+        name = entry['name']
+        description = entry['description']
+        reason_type = entry['reasontype']
+        reason_category = entry['reasoncategory']
+        is_free_text_allowed = entry['isfreetextallowed']
+
+        inserts.append(
+            "('{}', '{}', '{}', '{}', '{}', '{}', '{}', {})".format(str(uuid.uuid4()), req_id, reason_id, name,
+                                                                    description,reason_type, reason_category,
+                                                                    is_free_text_allowed))
+
+    batch += ','.join(inserts)
+
+    cur.execute(batch)
 
 
 def update_all_requisitions_date_modified(cur):
@@ -109,3 +111,9 @@ def update_all_requisitions_date_modified(cur):
 
 def clear_snapshots(cur):
     cur.execute("DELETE FROM requisition.stock_adjustment_reasons")
+
+
+def count_bad_adjustments(cur, valid_reason_ids):
+    id_string = ','.join("'{}'".format(r_id) for r_id in valid_reason_ids)
+    cur.execute("""SELECT COUNT(*) FROM requisition.stock_adjustments WHERE reasonid NOT IN ({})""".format(id_string))
+    return cur.fetchone()[0]
