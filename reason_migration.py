@@ -13,6 +13,7 @@ db_name = os.environ['DB_NAME']
 db_pass = os.environ['DB_PASS']
 db_user = os.environ['DB_USER']
 
+batch_size = os.getenv('BATCH_SIZE', 2000)
 
 log_dir = 'log'
 
@@ -194,7 +195,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
             i += 1
 
-            if len(batch_data) >= 2000 or i == req_count:
+            if len(batch_data) >= batch_size or i == req_count:
                 debug.write("Executing batch insert of {}\n".format(len(batch_data)))
                 db.insert_requisition_snapshots(cur, batch_data)
                 del batch_data[:]
