@@ -48,6 +48,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
         # We go through ref data reasons, mapping them to valid reasons, creating missing reasons in the process
 
+        different_reason_props_count = 0
         for refdata_reason in refdata_reasons:
             debug.write("Reference data reason: ")
             debug.write(str(refdata_reason))
@@ -71,6 +72,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                                 .format(stock_reason[1], stock_reason['name']))
 
                     ref_stock_mapping[refdata_reason_id] = stock_reason[0]
+
                 else:
                     stock_reason = reason_utils.find_stock_reason(refdata_reason, stock_reasons)
                     if stock_reason is not None:
@@ -98,10 +100,8 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                         debug.write('Need to create new stock reason and valid reason\n')
 
                         r_id = str(uuid.uuid4())
-                        reason_type = 'CREDIT' if refdata_reason['additive'] else 'DEBIT'
 
-                        db.insert_stock_reason(cur, r_id, refdata_reason['name'], refdata_reason['description'], True,
-                                               'ADJUSTMENT', reason_type)
+                        db.insert_stock_reason(cur, r_id, name, description, True, 'ADJUSTMENT', reason_type)
 
                         vra_id = str(uuid.uuid4())
 
@@ -116,9 +116,20 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                         new_reason_count += 1
                         new_valid_reason_count += 1
 
+                if stock_reason is not None and not reason_utils.reason_properties_equal(refdata_reason,
+                                                                                         stock_reason):
+                    different_reason_props_count += 1
+                    debug.write("WARN: ref data reason {} and stock management reason {} have the same name[{}]"
+                                " but different type and description\n"
+                                .format(refdata_reason_id, stock_reason[0], name))
         reason_utils.print_and_debug(debug, "Done migrating Reference Data reasons to Stock Management. Added {} new "
                                             "reasons, and {} valid reason assignments.\n"
                                      .format(str(new_reason_count), str(new_valid_reason_count)))
+
+        if different_reason_props_count > 0:
+            reason_utils.print_and_debug(debug, "WARNING! {} valid reason assignments have different descriptions or "
+                                                "types between Reference Data and Stock Management\n"
+                                         .format(different_reason_props_count))
 
         stock_ids = db.fetch_stock_reason_ids(cur)
 

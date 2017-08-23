@@ -4,7 +4,7 @@ import sys
 
 def find_full_stock_reason(refdata_reason, stock_reasons, facility_type):
     for stock_reason in stock_reasons:
-        if reason_properties_equal(refdata_reason, stock_reason) and \
+        if name_equal(refdata_reason, stock_reason) and \
                 reason_relations_match(refdata_reason, stock_reason, facility_type):
             return stock_reason
     return None
@@ -12,14 +12,19 @@ def find_full_stock_reason(refdata_reason, stock_reasons, facility_type):
 
 def find_stock_reason(refdata_reason, stock_reasons):
     for stock_reason in stock_reasons:
-        if reason_properties_equal(refdata_reason, stock_reason):
+        if name_equal(refdata_reason, stock_reason):
             return stock_reason
     return None
 
 
 def reason_properties_equal(refdata_reason, stock_reason):
-    return to_lower(refdata_reason['name']) == to_lower(stock_reason['name']) and \
-           to_lower(refdata_reason['description']) == to_lower(stock_reason['description'])
+    return name_equal(refdata_reason, stock_reason) and \
+           to_lower(refdata_reason['description']) == to_lower(stock_reason['description']) and \
+           reason_type_equal(refdata_reason, stock_reason)
+
+
+def name_equal(refdata_reason, stock_reason):
+    return to_lower(refdata_reason['name']) == to_lower(stock_reason['name'])
 
 
 def reason_relations_match(refdata_reason, stock_reason, facility_type):
