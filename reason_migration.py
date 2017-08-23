@@ -122,6 +122,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     debug.write("WARN: ref data reason {} and stock management reason {} have the same name[{}]"
                                 " but different type and description\n"
                                 .format(refdata_reason_id, stock_reason[0], name))
+
         reason_utils.print_and_debug(debug, "Done migrating Reference Data reasons to Stock Management. Added {} new "
                                             "reasons, and {} valid reason assignments.\n"
                                      .format(str(new_reason_count), str(new_valid_reason_count)))
