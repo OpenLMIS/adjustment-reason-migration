@@ -231,7 +231,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 db.update_adjustments(cur, old_id, new_id)
                 updated_adjustments_count += cur.rowcount
             else:
-                debug.write('{} is the same reason id both in Reference Data and Stock Management'.format(old_id))
+                debug.write('{} is the same reason id both in Reference Data and Stock Management\n'.format(old_id))
 
             debug.write('Updated {} adjustments\n'.format(cur.rowcount))
 
