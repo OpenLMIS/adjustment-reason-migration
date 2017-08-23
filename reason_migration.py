@@ -105,7 +105,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
                         vra_id = str(uuid.uuid4())
 
-                        db.insert_valid_reason(cur, vra_id, facility_type_id, refdata_reason['programid'], r_id)
+                        db.insert_valid_reason(cur, vra_id, facility_type_id, program_id, r_id)
 
                         entry = reason_utils.reason_entry(r_id, vra_id, name, description, facility_type_id, program_id,
                                                           reason_type, 'ADJUSTMENT', True)
