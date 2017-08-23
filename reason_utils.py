@@ -61,5 +61,5 @@ def print_and_debug(debug, msg):
 def print_percentage(completed, total):
     percentage = int((float(completed) / total) * 100)
 
-    sys.stdout.write("\rMigration progress: {}%".format(percentage))
+    sys.stdout.write("\rMigration progress: {}/{} ({}%)".format(completed, total, percentage))
     sys.stdout.flush()
