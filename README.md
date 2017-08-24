@@ -84,6 +84,11 @@ In the last step, we iterate over all stock adjustments and based on the mapping
 new reason ids that point to stock. If an adjustments already has an ID that points to a stock management
 reason, we leave it alone.
 
+See further information: 
+
+JIRA Ticket: [OLMIS-2830](https://openlmis.atlassian.net/browse/OLMIS-2830)
+
+Wiki background: [Connecting Stock Management and Requisition Services](https://openlmis.atlassian.net/wiki/spaces/OP/pages/114234797/Connecting+Stock+Management+and+Requisition+Services)
 
 ## Error reporting
 
