@@ -2,6 +2,8 @@
 
 Cross service migration of adjustment reasons used by Requisition - from Referencedata to Stock Management.
 
+## Pre-requisites 
+
 ## Usage
 
 In order to use the first, you need the configuration file for it in your local working directory.

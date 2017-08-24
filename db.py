@@ -106,7 +106,7 @@ def insert_requisition_snapshots(cur, data):
 
 def update_all_requisitions_date_modified(cur):
     now = datetime.datetime.utcnow()
-    cur.execute("""UPDATE requisition.requisitions SET modifiedDate = %s""", [now])
+    cur.execute("""UPDATE requisition.requisitions SET modifieddate = %s""", [now])
 
 
 def clear_snapshots(cur):
