@@ -13,7 +13,7 @@ db_name = os.environ['DB_NAME']
 db_pass = os.environ['DB_PASS']
 db_user = os.environ['DB_USER']
 
-batch_size = os.getenv('BATCH_SIZE', 2000)
+batch_size = int(os.getenv('BATCH_SIZE', 2000))
 
 log_dir = 'log'
 
@@ -190,7 +190,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     new_snapshot_count += 1
 
             else:
-                debug.write('No snapshots will be created for requistion: {}. Facility type: {} program :{}\n'
+                debug.write('No snapshots will be created for requisition: {}. Facility type: {} program :{}\n'
                             .format(req_id, facility_type_id, program_id))
 
             i += 1
