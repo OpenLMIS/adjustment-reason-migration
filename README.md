@@ -4,6 +4,26 @@ Cross service migration of adjustment reasons used by Requisition - from Referen
 
 ## Pre-requisites 
 
+* Already using OpenLMIS 3.0.x or 3.1.x.
+* Hosting OpenLMIS inside Docker with Docker Compose, and using PostgreSQL or AWS RDS as the database, with all OpenLMIS services using the same database instance.
+* Requires administrator-level server access.
+
+It is **strongly** suggested to run the migration on a staging/test server with a copy of production data 
+first in order to verify the migration before running on production server
+
+## Migration instructions
+
+Pre-planning: Schedule downtime to perform the upgrade; do the upgrade on a Test/Staging server in advance before Production.
+
+1. Bring server offline (so no more edits to data will be accepted from users). Stop the OpenLMIS services (docker-compose down).
+2. Take full database backup. (And make sure you have a backup of the code/services deployed as well so you could roll back if necessary.)
+3. Upgrade to OpenLMIS 3.2.0 components (usual steps to change versions of components used in your ref-distro docker-compose.yml).
+4. Run the migration script. See section below for details.
+5. Start the server to run OpenLMIS again (docker-compose up).
+6. Run some manual tests to ensure the system is in good health (try viewing a requisition or examining a few records).
+7. Bring server online (begin accepting outside traffic from users again).
+
+
 ## Usage
 
 In order to use the first, you need the configuration file for it in your local working directory.
