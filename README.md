@@ -97,3 +97,8 @@ requisitions and non-existent reason IDs for stock adjustments. Detailed data on
 can be found in the debug log.
 
 The script also reports on the numbers of data it processes as well the number of updates it executes.
+
+If the script is ran twice, it should not corrupt the data, since it does all the necessary checks before
+altering the data. Any additional data that was added in the meantime will be migrated. Make note that however,
+that valid reason snapshots in requisitions will always be recreated and the requisition modification date 
+will be updated. Checking if those already exist is not done for performance reasons.
