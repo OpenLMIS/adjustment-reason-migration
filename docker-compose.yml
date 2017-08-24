@@ -1,6 +1,6 @@
 version: "2"
 services:
-        migration:
+        adjustment-reason-migration:
                 image: openlmis/adjustment-reason-migration
                 env_file: .env
                 volumes:

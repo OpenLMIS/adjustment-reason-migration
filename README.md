@@ -16,7 +16,7 @@ connect to PostgreSQL database instance which OpenLMIS is using.
 Next simply run the migration script using Docker Compose:
 
 ```bash
-docker-compose run migration
+docker-compose run adjustment-reason-migration
 ```
 
 That's it - the migration will run and give you output about its progress.
