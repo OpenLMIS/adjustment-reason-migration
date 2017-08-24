@@ -2,6 +2,7 @@
 import datetime
 import psycopg2.extras
 import uuid
+import reason_utils
 
 
 def connect(host, port, db_name, user, password):
@@ -22,7 +23,7 @@ def insert_stock_reason(cursor, r_id, name, description, isfreetextallowed, reas
 
 def update_adjustments(cur, old_reason_id, new_reason_id):
     cur.execute("""UPDATE requisition.stock_adjustments SET reasonid = %s WHERE reasonid = %s""", (new_reason_id,
-                                                                                             old_reason_id))
+                                                                                                   old_reason_id))
 
 
 def count_adjustments(cur):
@@ -87,7 +88,7 @@ def insert_requisition_snapshots(cur, data):
     inserts = []
 
     for (req_id, entry) in data:
-        reason_id = entry[0]
+        reason_id = entry[reason_utils.REASON_ID_INDEX]
         name = entry['name']
         description = entry['description']
         reason_type = entry['reasontype']
@@ -96,7 +97,7 @@ def insert_requisition_snapshots(cur, data):
 
         inserts.append(
             "('{}', '{}', '{}', '{}', '{}', '{}', '{}', {})".format(str(uuid.uuid4()), req_id, reason_id, name,
-                                                                    description,reason_type, reason_category,
+                                                                    description, reason_type, reason_category,
                                                                     is_free_text_allowed))
 
     batch += ','.join(inserts)

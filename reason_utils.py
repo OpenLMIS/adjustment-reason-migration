@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import sys
 
+REASON_ID_INDEX = 0
+VRA_ID_INDEX = 1
 
 def find_full_stock_reason(refdata_reason, stock_reasons, facility_type):
     for stock_reason in stock_reasons:
@@ -47,9 +49,9 @@ def to_lower(string):
 
 def reason_entry(r_id, v_id, name, description, facility_type_id, program_id, reason_type, reason_category,
                  is_free_text_allowed):
-    return {0: r_id, 1: v_id, 'name': name, 'description': description, 'programid': program_id,
-            'facilitytypeid': facility_type_id, 'reasontype': reason_type, 'reasoncategory': reason_category,
-            'isfreetextallowed': is_free_text_allowed}
+    return {REASON_ID_INDEX: r_id, VRA_ID_INDEX: v_id, 'name': name, 'description': description,
+            'programid': program_id, 'facilitytypeid': facility_type_id, 'reasontype': reason_type,
+            'reasoncategory': reason_category, 'isfreetextallowed': is_free_text_allowed}
 
 
 def print_and_debug(debug, msg):

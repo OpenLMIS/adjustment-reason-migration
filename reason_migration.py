@@ -70,9 +70,9 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 if stock_reason is not None:
                     # We have found a reason/valid reason combo that matches
                     debug.write('Found exact existing valid reason. id: {}, name: {}\n'
-                                .format(stock_reason[1], stock_reason['name']))
+                                .format(stock_reason[reason_utils.VRA_ID_INDEX], stock_reason['name']))
 
-                    ref_stock_mapping[refdata_reason_id] = stock_reason[0]
+                    ref_stock_mapping[refdata_reason_id] = stock_reason[reason_utils.REASON_ID_INDEX]
 
                 else:
                     stock_reason = reason_utils.find_stock_reason(refdata_reason, stock_reasons)
@@ -84,7 +84,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                         debug.write('Need to create valid reason for program & facility type\n')
 
                         vra_id = str(uuid.uuid4())
-                        r_id = stock_reason[0]
+                        r_id = stock_reason[reason_utils.REASON_ID_INDEX]
 
                         db.insert_valid_reason(cur, vra_id, facility_type_id, program_id, r_id)
 
@@ -122,7 +122,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     different_reason_props_count += 1
                     debug.write("WARN: ref data reason {} and stock management reason {} have the same name[{}]"
                                 " but different type and description\n"
-                                .format(refdata_reason_id, stock_reason[0], name))
+                                .format(refdata_reason_id, stock_reason[reason_utils.REASON_ID_INDEX], name))
 
         reason_utils.print_and_debug(debug, "Done migrating Reference Data reasons to Stock Management. Added {} new "
                                             "reasons, and {} valid reason assignments.\n"
@@ -141,7 +141,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
         program_type_reason_mapping = {}
         for entry in stock_reasons:
             # Entries for reasons without valid assignments should get ignored
-            if entry[1] is not None:
+            if entry[reason_utils.VRA_ID_INDEX] is not None:
                 key = reason_utils.build_mapping_key(entry['facilitytypeid'], entry['programid'])
                 if program_type_reason_mapping.get(key) is None:
                     program_type_reason_mapping[key] = list()
@@ -182,7 +182,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 debug.write('Creating snapshots for requisition: {}. Facility type: {} program :{}\n'
                             .format(req_id, facility_type_id, program_id))
                 for entry in entry_list:
-                    reason_id = entry[0]
+                    reason_id = entry[reason_utils.REASON_ID_INDEX]
                     debug.write("Creating a snapshot for requisition {} and reason {}\n".format(req_id, reason_id))
 
                     batch_data.append((req_id, entry))
