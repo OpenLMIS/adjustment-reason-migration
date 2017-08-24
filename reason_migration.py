@@ -61,7 +61,7 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                 program_id = refdata_reason['programid']
                 facility_type_id = facility_type['id']
                 name = refdata_reason['name']
-                description = refdata_reason['name']
+                description = refdata_reason['description']
                 reason_type = 'CREDIT' if refdata_reason['additive'] else 'DEBIT'
                 refdata_reason_id = refdata_reason['id']
 
