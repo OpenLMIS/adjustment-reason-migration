@@ -32,10 +32,10 @@ less /tmp/adjustment-migration.log
 
 ## Building
 
-The Docker image is built on Docker Hub. In order to build the it locally, simply run the build script:
+The Docker image is built on Docker Hub. In order to build it locally, simply run the build script:
 
 ```bash
-./build.sh
+./util-scripts/build.sh
 ``` 
 
 ## Script details
