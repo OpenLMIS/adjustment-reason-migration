@@ -1,4 +1,4 @@
-# adjustment-reason-migration
+# openlmis-adjustment-reason-migration
 
 Cross service migration of adjustment reasons used by Requisition - from Referencedata to Stock Management.
 
