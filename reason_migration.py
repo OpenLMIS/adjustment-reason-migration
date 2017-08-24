@@ -195,7 +195,14 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
 
             i += 1
 
-            if len(batch_data) >= batch_size or i == req_count:
+            batch_len = len(batch_data)
+            is_batch_exec_time = batch_len >= batch_size
+            is_last_iter = i == req_count
+
+            debug.write('Current Batch Size: {}. Will execute at {}. Should exec now?: {}. Last iteration?: {}\n'
+                        .format(batch_len, batch_size, is_batch_exec_time, is_last_iter))
+
+            if is_batch_exec_time or is_last_iter:
                 debug.write("Executing batch insert of {}\n".format(len(batch_data)))
                 db.insert_requisition_snapshots(cur, batch_data)
                 del batch_data[:]
