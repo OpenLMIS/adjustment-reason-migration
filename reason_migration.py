@@ -123,6 +123,8 @@ with open(log_dir + '/adjustment-migration.log', 'w') as debug:
                     debug.write("WARN: ref data reason {} and stock management reason {} have the same name[{}]"
                                 " but different type and description\n"
                                 .format(refdata_reason_id, stock_reason[reason_utils.REASON_ID_INDEX], name))
+                    debug.write("Inconsistent RefData reason - {}\n".format(str(refdata_reason)))
+                    debug.write("Inconsistent Stock reason - {}\n".format(str(stock_reason)))
 
         reason_utils.print_and_debug(debug, "Done migrating Reference Data reasons to Stock Management. Added {} new "
                                             "reasons, and {} valid reason assignments.\n"
