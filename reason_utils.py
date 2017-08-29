@@ -1,8 +1,10 @@
 #!/usr/bin/python
 import sys
 
+
 REASON_ID_INDEX = 0
 VRA_ID_INDEX = 1
+
 
 def find_full_stock_reason(refdata_reason, stock_reasons, facility_type):
     for stock_reason in stock_reasons:
@@ -57,7 +59,7 @@ def reason_entry(r_id, v_id, name, description, facility_type_id, program_id, re
 def print_and_debug(debug, msg):
     debug.write(msg)
     debug.write('\n')
-    print msg
+    print(msg)
 
 
 def print_percentage(completed, total):

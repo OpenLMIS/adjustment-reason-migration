@@ -5,13 +5,31 @@ import reason_utils
 import db
 import uuid
 import os
+from jdbcurl import JdbcUrl
 
 
-db_host = os.environ['DB_HOST']
-db_port = os.environ['DB_PORT']
-db_name = os.environ['DB_NAME']
-db_pass = os.environ['DB_PASS']
-db_user = os.environ['DB_USER']
+db_url = os.getenv('DATABASE_URL')
+db_pass = os.getenv('POSTGRES_PASSWORD')
+db_user = os.getenv('POSTGRES_USER')
+
+if db_url is None or db_pass is None or db_user is None:
+    print("DATABASE_URL, POSTGRES_USER and POSTGRES_PASSWORD env variables have to be defined before running")
+    exit(1)
+
+jdbc_url = JdbcUrl(db_url)
+
+db_host = jdbc_url.host
+db_port = jdbc_url.port
+db_name = jdbc_url.db_name
+db_scheme = jdbc_url.scheme
+
+if db_scheme != 'postgresql':
+    print("'postgresql' is the only currently supported database (wrong/missing scheme in the database url)")
+    exit(1)
+
+if db_host is None or db_name is None:
+    print("Database name and database host must be defined using the DATABASE_URL variable")
+    exit(1)
 
 batch_size = int(os.getenv('BATCH_SIZE', 2000))
 

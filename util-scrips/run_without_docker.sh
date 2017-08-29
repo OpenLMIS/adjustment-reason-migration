@@ -1,9 +1,7 @@
 #!/bin/sh
 
-export DB_HOST='10.222.17.221'
-export DB_USER='postgres'
-export DB_PASS='p@ssw0rd'
-export DB_NAME='open_lmis'
-export DB_PORT='5432'
+export DATABASE_URL='postgresql://10.222.17.221:5432/open_lmis'
+export POSTGRES_USER='postgres'
+export POSTGRES_PASSWORD='p@ssw0rd'
 
 ./reason_migration.py
