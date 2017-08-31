@@ -32,10 +32,11 @@ In the top-level directory of this repository execute:
 ```bash
 cp sample-config/.env .
 ```
-You can also use the .env file you are using for the OpenLMIS distribution - the configuration is compatible.
 
 Then edit the file, so that it points to your database. The script needs to
 connect to PostgreSQL database instance which OpenLMIS is using.
+
+**Note:** You can also use the .env file you are using for the OpenLMIS distribution - the configuration is compatible.
 
 Next simply run the migration script using Docker Compose:
 
